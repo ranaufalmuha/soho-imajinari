@@ -1,189 +1,110 @@
-import { useRef, useState } from "react";
-import VerticalReel, {
-  type VerticalReelHandle,
-  type VerticalReelItem,
-} from "./react-bits/vertical-reel";
+import { useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import VerticalReel from "./react-bits/vertical-reel";
+import { FILMS } from "./films";
+import { TICKETS_URL } from "./tickets";
 
-// Ganti array ini dengan gambar sendiri kapan saja.
-// (Bawaan: 8 karya demo dari pro.reactbits.dev)
-const ITEMS: VerticalReelItem[] = [
-  {
-    src: "https://pro.reactbits.dev/demo-media/abstract-amber-loop.webp",
-    alt: "Lingkaran emas-amber miring di atas bidang ungu-raspberry berbutir",
-    title: "Simpul Amber",
-    subtitle: "Kelembutan di tengah ruang",
-  },
-  {
-    src: "https://pro.reactbits.dev/demo-media/abstract-pink-eclipse.webp",
-    alt: "Cakram koral-merah muda melintasi bidang diagonal violet",
-    title: "Gerhana Senja",
-    subtitle: "Satu cakram melintasi diagonal",
-  },
-  {
-    src: "https://pro.reactbits.dev/demo-media/abstract-plum-ribbon.webp",
-    alt: "Pita diagonal pink dan plum yang saling berpotongan",
-    title: "Pita Plum",
-    subtitle: "Dua pita, satu persilangan",
-  },
-  {
-    src: "https://pro.reactbits.dev/demo-media/abstract-violet-steps.webp",
-    alt: "Tiga bidang bertingkat violet dan pink dengan tepi amber",
-    title: "Anak Tangga Violet",
-    subtitle: "Tiga bidang dalam irama",
-  },
-  {
-    src: "https://pro.reactbits.dev/demo-media/abstract-rose-balance.webp",
-    alt: "Persegi raspberry miring dan cakram tangerine di atas bidang rose",
-    title: "Keseimbangan Mawar",
-    subtitle: "Satu titik terang penyeimbang",
-  },
-  {
-    src: "https://pro.reactbits.dev/demo-media/abstract-coral-fold.webp",
-    alt: "Lipatan bidang vermilion dan oranye di atas plum pekat",
-    title: "Lipatan Koral",
-    subtitle: "Belokan arah yang berani",
-  },
-  {
-    src: "https://pro.reactbits.dev/demo-media/abstract-fuchsia-wave.webp",
-    alt: "Pita fuchsia berbentuk S dengan gradien koral",
-    title: "Gelombang Fuchsia",
-    subtitle: "Satu lengkung tanpa putus",
-  },
-  {
-    src: "https://pro.reactbits.dev/demo-media/abstract-orchid-orbit.webp",
-    alt: "Cincin fuchsia dan sabit peach di atas ungu anggrek berbutir",
-    title: "Orbit Anggrek",
-    subtitle: "Warna dalam orbit",
-  },
-];
-
-const pad = (n: number) => String(n).padStart(2, "0");
+// Item reel HANYA film yang sedang tayang (`nowShowing`), bukan seluruh
+// filmografi. `title` = judul film (jadi heading hero), `subtitle` =
+// sinopsis singkat (dipotong di 3 baris oleh CSS).
+// Gambar memakai `backdrop` (poster horizontal 16:9, cocok untuk kartu reel)
+// dan jatuh kembali ke `poster` vertikal kalau belum ada.
+const ITEMS = FILMS.filter((film) => film.nowShowing).map((film) => ({
+  src: film.backdrop || film.poster,
+  alt: `Poster ${film.title} (${film.year}), sutradara ${film.director}`,
+  title: film.title,
+  subtitle: film.synopsis,
+}));
 
 export default function ReelHero() {
-  const reelRef = useRef<VerticalReelHandle>(null);
   const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   const current = ITEMS[active] ?? ITEMS[0];
 
+  const swap = {
+    duration: reduceMotion ? 0 : 0.45,
+    ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+  };
+
   return (
-    <section className="relative h-svh min-h-[640px] w-full overflow-hidden bg-[#08080d] text-neutral-100">
-      {/* Reel 3D mengisi seluruh hero */}
-      <VerticalReel
-        ref={reelRef}
-        items={ITEMS}
-        captions={false}
-        paused={paused}
-        onIndexChange={setActive}
-        className="absolute inset-0"
-        ariaLabel="Galeri imajinari. Seret atau sentuh untuk memutar, gulir atau gunakan tombol panah untuk berpindah karya."
-      />
+    <section className="relative flex min-h-svh flex-col overflow-hidden bg-[#08080d] pt-24 text-neutral-100 sm:pt-28">
+      {/* Reel 3D di paruh atas hero (naik dari posisi tengah sebelumnya).
+          wheel={false} supaya gulir halaman tidak ikut tertelan —
+          reel hanya digerakkan dengan seret/sentuh (plus tombol panah keyboard). */}
+      {/* Wadah reel. Cincin selalu berada di TENGAH wadah (geo.cy = height / 2),
+          jadi ruang kosong di bawah kartu = (1 - size) / 2 x tinggi wadah.
+          Untuk mendekatkan teks ke kartu: perkecil tinggi wadah dan/atau
+          perbesar `size` — jangan pakai translate, itu tidak menggeser layout. */}
+      <div className="relative z-10 h-[56svh] min-h-[340px] w-full shrink-0">
+        <VerticalReel
+          items={ITEMS}
+          captions={false}
+          wheel={false}
+          radius={0}
+          aspect={16 / 9}
+          size={0.7}
+          onIndexChange={setActive}
+          className="absolute inset-0"
+          style={{ minHeight: 0 }}
+          ariaLabel="Galeri film imajinari. Seret atau sentuh untuk memutar, atau gunakan tombol panah untuk berpindah film."
+        />
+      </div>
 
-      {/* Scrim agar teks terbaca */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/70 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+      {/* Teks + aksi, menempel tepat di bawah reel */}
+      <div className="relative z-10 flex shrink-0 flex-col items-center px-6 pt-2 pb-12 text-center sm:px-10">
+        <p className="text-xs font-medium tracking-[0.08em] text-neutral-400 uppercase">
+          Sedang tayang
+        </p>
 
-      {/* Lapisan overlay: tembus drag kecuali kontrol */}
-      <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-6 sm:p-10">
-        {/* Bar atas */}
-        <header className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold tracking-[0.2em] uppercase">
-              imajinari
-            </p>
-            <p className="mt-1 text-xs tracking-[0.08em] text-neutral-400 uppercase">
-              Galeri interaktif — Vol. 01
-            </p>
-          </div>
-          <div className="pointer-events-auto flex items-center gap-3">
-            <p className="text-sm text-neutral-300 tabular-nums">
-              {pad(active + 1)} <span className="text-neutral-500">/ {pad(ITEMS.length)}</span>
-            </p>
-            <button
-              type="button"
-              onClick={() => setPaused((v) => !v)}
-              className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-medium tracking-wide backdrop-blur transition hover:bg-white/15"
-              aria-pressed={paused}
-            >
-              {paused ? "▶ Jalan" : "❚❚ Jeda"}
-            </button>
-          </div>
-        </header>
-
-        {/* Blok bawah */}
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-xl">
-            <h1 className="text-4xl leading-[1.05] font-medium tracking-tight text-balance sm:text-5xl lg:text-6xl">
-              Imajinasi dalam gerak.
-            </h1>
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-neutral-300 sm:text-base">
-              Seret, putar, dan jelajahi delapan karya abstrak dalam cincin 3D
-              yang hidup — setiap putaran berhenti tepat pada satu karya.
-            </p>
-            <div className="pointer-events-auto mt-6 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => reelRef.current?.spin(4)}
-                className="rounded-full bg-neutral-100 px-6 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-white"
+        {/* Semua panel ditumpuk di satu sel grid: tinggi wadah otomatis mengikuti
+            panel tertinggi (judul 2 baris + sinopsis 3 baris), sehingga tombol
+            tidak pernah meloncat dan tidak ada celah sisa. */}
+        <div className="mt-4 grid w-full max-w-2xl">
+          {ITEMS.map((item, index) => {
+            const isActive = index === active;
+            return (
+              <motion.div
+                key={item.title}
+                className="col-start-1 row-start-1 flex flex-col items-center"
+                aria-hidden={!isActive}
+                initial={false}
+                animate={{ opacity: isActive ? 1 : 0, y: isActive || reduceMotion ? 0 : 10 }}
+                transition={swap}
+                style={{ pointerEvents: isActive ? "auto" : "none" }}
               >
-                Putar Reel
-              </button>
-              <a
-                href="https://pro.reactbits.dev/docs/components/vertical-reel"
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium backdrop-blur transition hover:bg-white/15"
-              >
-                Tentang komponen ↗
-              </a>
-            </div>
-          </div>
-
-          {/* Kartu karya aktif */}
-          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
-            <p className="text-xs font-medium tracking-[0.08em] text-neutral-400 uppercase">
-              Karya {pad(active + 1)}
-            </p>
-            <p key={current.title} className="mt-1 text-2xl font-medium tracking-tight">
-              {current.title}
-            </p>
-            <p className="mt-1 text-sm text-neutral-400">{current.subtitle}</p>
-            <div className="pointer-events-auto mt-4 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-1.5" role="tablist" aria-label="Pilih karya">
-                {ITEMS.map((item, i) => (
-                  <button
-                    key={item.src}
-                    type="button"
-                    role="tab"
-                    aria-selected={i === active}
-                    aria-label={`Ke karya ${item.title}`}
-                    onClick={() => reelRef.current?.goTo(i)}
-                    className={`h-1.5 rounded-full transition-all ${
-                      i === active ? "w-6 bg-neutral-100" : "w-1.5 bg-white/25 hover:bg-white/50"
-                    }`}
-                  />
-                ))}
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => reelRef.current?.previous()}
-                  aria-label="Karya sebelumnya"
-                  className="grid size-10 place-items-center rounded-full border border-white/15 bg-white/5 text-lg transition hover:bg-white/15"
+                <h1 className="text-4xl leading-[1.05] font-medium tracking-tight text-balance sm:text-5xl lg:text-6xl">
+                  {item.title}
+                </h1>
+                <p
+                  title={item.subtitle}
+                  className="mx-auto mt-4 line-clamp-3 max-w-md text-sm leading-relaxed text-neutral-300 text-pretty sm:text-base"
                 >
-                  ←
-                </button>
-                <button
-                  type="button"
-                  onClick={() => reelRef.current?.next()}
-                  aria-label="Karya berikutnya"
-                  className="grid size-10 place-items-center rounded-full border border-white/15 bg-white/5 text-lg transition hover:bg-white/15"
-                >
-                  →
-                </button>
-              </div>
-            </div>
-          </div>
+                  {item.subtitle}
+                </p>
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+                  {/* Tiket film yang sedang tayang — URL pusat di tickets.ts */}
+                  <a
+                    href={TICKETS_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    tabIndex={isActive ? 0 : -1}
+                    className="rounded-full bg-neutral-100 px-6 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-white"
+                  >
+                    Get Tickets
+                  </a>
+                  {/* TODO: arahkan ke halaman detail film */}
+                  <a
+                    href="#tentang-film"
+                    tabIndex={isActive ? 0 : -1}
+                    className="rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium backdrop-blur transition hover:bg-white/15"
+                  >
+                    Tentang Film
+                  </a>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

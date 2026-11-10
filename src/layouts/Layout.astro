@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import Navigation9 from '../components/blocks/navigation-9.tsx';
+import Footer from '../components/Footer.tsx';
 ---
 
 <!doctype html>
@@ -13,8 +15,10 @@ import '../styles/global.css';
 		<title>imajinari — Imajinasi dalam Gerak</title>
 		<meta name="description" content="Galeri interaktif imajinari: seret, putar, dan jelajahi delapan karya abstrak dalam cincin 3D yang hidup." />
 	</head>
-	<body>
+	<body class="bg-[#0b0b12] text-neutral-100 antialiased">
+		<Navigation9 client:load />
 		<slot />
+		<Footer client:visible />
 	</body>
 </html>
 

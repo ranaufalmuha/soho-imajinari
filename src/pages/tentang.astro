@@ -1,0 +1,19 @@
+---
+import AboutHero from '../components/AboutHero.tsx';
+import AboutIntro from '../components/AboutIntro.tsx';
+import TeamSection from '../components/TeamSection.tsx';
+import CtaSection from '../components/CtaSection.tsx';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+	{/* Tanpa pt global: hero mengurus sendiri jarak ke nav fixed di atasnya.
+	    client:visible (bukan client:only) supaya H1 tetap ter-render di HTML
+	    saat build — penting untuk SEO halaman profil. */}
+	<main>
+		<AboutHero client:visible />
+		<AboutIntro client:visible />
+		<TeamSection client:visible />
+		<CtaSection client:visible />
+	</main>
+</Layout>

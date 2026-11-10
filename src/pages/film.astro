@@ -1,0 +1,13 @@
+---
+import FilmGrid from '../components/FilmGrid.tsx';
+import CtaSection from '../components/CtaSection.tsx';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+	{/* pt untuk ruang nav fixed di atas; archive=true = seluruh filmografi, tanpa batas 15 */}
+	<main className="pt-24 sm:pt-28">
+		<FilmGrid client:visible archive={true} />
+		<CtaSection client:visible />
+	</main>
+</Layout>

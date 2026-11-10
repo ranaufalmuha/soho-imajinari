@@ -1,0 +1,22 @@
+/**
+ * Design tokens — satu-satunya sumber kebenaran untuk nilai layout bersama.
+ *
+ * Semua section (KECUALI hero) memakai `.site-container` agar max-width
+ * seragam. Ubah angkanya di sini, seluruh halaman ikut berubah.
+ */
+
+@theme {
+  /* Lebar konten maksimum seluruh section non-hero. */
+  --site-max-width: 87.5rem; /* 1400px */
+
+  /* Warna aksen utama brand. Contoh pakai: bg-(--color-accent),
+     text-(--color-accent), border-(--color-accent). */
+  --color-accent: #ffd012;
+}
+
+/* Wadah konten standar: penuh di mobile, mentok di token saat layar lebar. */
+@utility site-container {
+  width: 100%;
+  max-width: var(--site-max-width);
+  margin-inline: auto;
+}
