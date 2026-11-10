@@ -33,8 +33,10 @@ const trailerUrl = `https://www.youtube.com/watch?v=${videoId}`;
 	<div class="absolute inset-0 -z-10">
 		<HeroVideoBackground client:idle videoId={videoId} title={`Trailer ${film.title}`} />
 
-		<div class="absolute inset-0 bg-gradient-to-t from-[#08080d] via-[#08080d]/70 to-[#08080d]/25"></div>
-		<div class="absolute inset-0 bg-gradient-to-r from-[#08080d]/90 via-[#08080d]/30 to-transparent"></div>
+		<!-- Scrim lebih tipis dari sebelumnya supaya trailer terlihat jelas;
+		     gradien bawah tetap pekat karena judul dan meta duduk di sana. -->
+		<div class="absolute inset-0 bg-gradient-to-t from-[#08080d] via-[#08080d]/45 to-[#08080d]/15"></div>
+		<div class="absolute inset-0 bg-gradient-to-r from-[#08080d]/75 via-[#08080d]/15 to-transparent"></div>
 	</div>
 
 	<div class="px-4 pb-16 sm:px-6 lg:px-8 lg:pb-20">
@@ -57,12 +59,7 @@ const trailerUrl = `https://www.youtube.com/watch?v=${videoId}`;
 				</div>
 
 				<div class="max-w-2xl">
-					<p class="flex items-center gap-3 text-xs font-medium tracking-[0.08em] text-neutral-300 uppercase">
-						<span class="h-px w-8 bg-(--color-accent)"></span>
-						{film.nowShowing ? "Sedang tayang" : "Filmografi"} · {film.year}
-					</p>
-
-					<h1 class="mt-5 text-4xl leading-[1.02] font-medium tracking-tight text-balance sm:text-5xl lg:text-6xl xl:text-7xl">
+					<h1 class="text-4xl leading-[1.02] font-medium tracking-tight text-balance sm:text-5xl lg:text-6xl xl:text-7xl">
 						{film.title}
 					</h1>
 

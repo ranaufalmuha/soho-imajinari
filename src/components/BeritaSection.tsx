@@ -9,7 +9,6 @@ import { BERITA, formatBeritaDate, type Berita } from "./berita";
 // Dipakai juga di /berita sebagai "Berita lainnya" lewat props.
 
 interface BeritaSectionProps {
-  eyebrow?: string;
   title?: string;
   description?: string;
   items?: Berita[];
@@ -25,7 +24,6 @@ const DEFAULT_DESCRIPTION =
   "Catatan produksi, rekor penonton, dan perjalanan film kami di festival.";
 
 export function BeritaSection({
-  eyebrow = "Berita",
   title = DEFAULT_TITLE,
   description = DEFAULT_DESCRIPTION,
   items = BERITA.slice(0, 3),
@@ -68,11 +66,7 @@ export function BeritaSection({
           className="mb-10 flex flex-col gap-4 sm:mb-12 lg:flex-row lg:items-end lg:justify-between"
         >
           <div className="max-w-2xl">
-            <p className="flex items-center gap-3 text-xs font-medium tracking-[0.08em] text-neutral-500 uppercase">
-              <span className="h-px w-8 bg-(--color-accent)"></span>
-              {eyebrow}
-            </p>
-            <Heading className="mt-5 text-3xl leading-[1.05] font-medium tracking-tight text-balance sm:text-4xl lg:text-5xl">
+            <Heading className="text-3xl leading-[1.05] font-medium tracking-tight text-balance sm:text-4xl lg:text-5xl">
               {title}
             </Heading>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-pretty text-neutral-400 sm:text-lg">

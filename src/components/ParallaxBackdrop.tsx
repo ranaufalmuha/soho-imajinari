@@ -24,7 +24,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from "motion/react"
  *
  * 18% x 160% = 28,8% < 30% ruang lebih, jadi tepi gambar tidak pernah bocor.
  * `prefers-reduced-motion` → tanpa transform sama sekali.
- * Overlay hitam 65% tetap ada supaya teks kredit terbaca di atas gambar.
+ * Overlay hitam 90% meredam backdrop supaya teks kredit tetap dominan.
  */
 interface ParallaxBackdropProps {
 	src: string;
@@ -53,7 +53,10 @@ export function ParallaxBackdrop({ src }: ParallaxBackdropProps) {
 				style={reduceMotion ? undefined : { y }}
 				className="absolute inset-x-0 top-[-30%] h-[160%] w-full object-cover object-center will-change-transform"
 			/>
-			<div className="absolute inset-0 bg-black/65" />
+			{/* Overlay pekat: panel credit sempit (rasio 2:1) dan teksnya
+			    berjalan terus, jadi backdrop cuma boleh terbaca sebagai
+			    tekstur samar — bukan saingan visual teks kredit. */}
+			<div className="absolute inset-0 bg-black/90" />
 		</div>
 	);
 }

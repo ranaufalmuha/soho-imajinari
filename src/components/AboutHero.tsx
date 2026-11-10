@@ -95,11 +95,7 @@ export function AboutHero() {
             }}
             className="max-w-3xl"
           >
-            <p className="flex items-center gap-3 text-xs font-medium tracking-[0.08em] text-neutral-400 uppercase">
-              <span className="h-px w-8 bg-(--color-accent)" />
-              Tentang
-            </p>
-            <h1 className="mt-6 text-4xl leading-[1.02] font-medium tracking-tight text-balance sm:text-6xl lg:text-7xl">
+            <h1 className="text-4xl leading-[1.02] font-medium tracking-tight text-balance sm:text-6xl lg:text-7xl">
               Rumah produksi cerita orisinal.
             </h1>
             <p className="mt-6 max-w-xl text-base leading-relaxed text-pretty text-neutral-300 sm:text-lg">

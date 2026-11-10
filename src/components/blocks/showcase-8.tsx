@@ -14,7 +14,6 @@ import { FILMS, type Film } from "../films";
 //   daftar film, dan film aktif yang dikecualikan).
 
 interface Showcase8Props {
-  eyebrow?: string;
   title?: string;
   description?: string;
   films?: Film[];
@@ -28,7 +27,6 @@ const DEFAULT_DESCRIPTION =
   "Identitas, platform, dan situs peluncuran — dikerjakan bersama tim yang kini menjalankannya sendiri.";
 
 export function Showcase8({
-  eyebrow,
   title = DEFAULT_TITLE,
   description = DEFAULT_DESCRIPTION,
   films = FILMS,
@@ -139,15 +137,7 @@ export function Showcase8({
           className="mb-10 flex flex-col gap-8 sm:mb-12 lg:flex-row lg:items-end lg:justify-between"
         >
           <motion.div variants={reveal(20)} className="max-w-2xl">
-            {eyebrow && (
-              <p className="flex items-center gap-3 text-xs font-medium tracking-[0.08em] text-neutral-400 uppercase">
-                <span className="h-px w-8 bg-(--color-accent)" />
-                {eyebrow}
-              </p>
-            )}
-            <h2
-              className={`leading-[1.05] font-medium tracking-tight text-balance text-3xl sm:text-4xl lg:text-5xl ${eyebrow ? "mt-6" : ""}`}
-            >
+            <h2 className="leading-[1.05] font-medium tracking-tight text-balance text-3xl sm:text-4xl lg:text-5xl">
               {title}
             </h2>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-pretty text-neutral-400 sm:text-lg">
