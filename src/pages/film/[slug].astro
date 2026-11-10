@@ -1,0 +1,124 @@
+---
+import type { Film } from '../../components/films';
+import {
+	FILMS,
+	SHOWREEL_VIDEO_ID,
+	STUDIO_SOCIALS,
+	filmBackdrop,
+	getSimilarFilms,
+} from '../../components/films';
+import FilmDetailHero from '../../components/FilmDetailHero.astro';
+import FilmAbout from '../../components/FilmAbout.astro';
+import FilmCredits from '../../components/FilmCredits.astro';
+import Showcase8 from '../../components/blocks/showcase-8.tsx';
+import Layout from '../../layouts/Layout.astro';
+
+interface Props {
+	film: Film;
+}
+
+export function getStaticPaths() {
+	return FILMS.map((film) => ({
+		params: { slug: film.slug },
+		props: { film },
+	}));
+}
+
+const { film } = Astro.props;
+
+const site = Astro.site ?? new URL('https://imajinari.id');
+const canonical = new URL(`/film/${film.slug}`, site);
+const backdrop = filmBackdrop(film);
+const image = new URL(backdrop, site);
+
+/* Fallback akun studio selama akun resmi per film belum diisi di films.ts.
+   TODO: ganti dengan akun film masing-masing begitu tersedia. */
+const socials = film.socials?.length ? film.socials : STUDIO_SOCIALS;
+
+const similar = getSimilarFilms(film, 6);
+const trailerId = film.trailer || SHOWREEL_VIDEO_ID;
+
+const pageTitle = `${film.title} (${film.year}) — imajinari`;
+const synopsisText = (film.synopsisLong ?? [film.synopsis]).join(' ');
+const pageDescription =
+	synopsisText.length <= 155
+		? synopsisText
+		: `${synopsisText.slice(0, 152).trimEnd()}…`;
+
+const movieLd = {
+	'@context': 'https://schema.org',
+	'@type': 'Movie',
+	name: film.title,
+	url: canonical.href,
+	image: image.href,
+	description: synopsisText,
+	datePublished: film.releaseDate,
+	genre: film.genre,
+	inLanguage: 'id',
+	duration: film.runtime ? `PT${film.runtime}M` : undefined,
+	director: { '@type': 'Person', name: film.director },
+	actor: film.cast?.map((name) => ({ '@type': 'Person', name })),
+	productionCompany: {
+		'@type': 'Organization',
+		name: 'Imajinari',
+		url: site.href,
+	},
+	trailer: film.trailer
+		? {
+				'@type': 'VideoObject',
+				name: `Trailer ${film.title} (${film.year})`,
+				embedUrl: `https://www.youtube-nocookie.com/embed/${film.trailer}`,
+			}
+		: undefined,
+};
+
+const breadcrumbLd = {
+	'@context': 'https://schema.org',
+	'@type': 'BreadcrumbList',
+	itemListElement: [
+		{
+			'@type': 'ListItem',
+			position: 1,
+			name: 'Beranda',
+			item: new URL('/', site).href,
+		},
+		{
+			'@type': 'ListItem',
+			position: 2,
+			name: 'Film',
+			item: new URL('/film', site).href,
+		},
+		{
+			'@type': 'ListItem',
+			position: 3,
+			name: film.title,
+			item: canonical.href,
+		},
+	],
+};
+---
+
+<Layout title={pageTitle} description={pageDescription} image={backdrop} type="article">
+	<main>
+		<FilmDetailHero film={film} videoId={trailerId} />
+
+		<FilmAbout film={film} socials={socials} />
+
+		<FilmCredits film={film} />
+
+		{similar.length > 0 && (
+			<Showcase8
+				client:visible
+				eyebrow="Filmografi"
+				title="Film serupa."
+				description={`Judul lain dari Imajinari yang paling dekat dengan ${film.title} — dari sutradara, genre, atau tahun yang sama.`}
+				films={similar}
+				limit={6}
+				ariaLabel={`Film serupa dengan ${film.title}`}
+			/>
+		)}
+	</main>
+
+	<script type="application/ld+json" set:html={JSON.stringify(movieLd)} />
+	<script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+</Layout>

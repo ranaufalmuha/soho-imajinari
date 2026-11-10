@@ -2,10 +2,38 @@
 import '../styles/global.css';
 import Navigation9 from '../components/blocks/navigation-9.tsx';
 import Footer from '../components/Footer.tsx';
----
+/**
+ * Layout global. Semua prop opsional — halaman yang tidak mengirim apa pun
+ * tetap memakai nilai bawaan lama (beranda, /tentang, 404).
+ * Halaman film mengirim title/description/image/canonical sendiri.
+ */
+interface Props {
+	title?: string;
+	description?: string;
+	/** Path absolut dari root situs, mis. "/film/poster/horizontal/agak_laen.jpg". */
+	image?: string;
+	type?: "website" | "article";
+}
 
+const DEFAULT_TITLE = 'imajinari — Imajinasi dalam Gerak';
+const DEFAULT_DESCRIPTION =
+	'Rumah produksi film dan serial web di Jakarta. Ngeri-Ngeri Sedap, Jatuh Cinta Seperti di Film-Film, Agak Laen, dan karya-karya berikutnya.';
+const DEFAULT_IMAGE = '/logo-square.jpg';
+
+const {
+	title = DEFAULT_TITLE,
+	description = DEFAULT_DESCRIPTION,
+	image = DEFAULT_IMAGE,
+	type = 'website',
+} = Astro.props;
+
+// Fallback domain selama `site` belum diset di astro.config.mjs.
+const site = Astro.site ?? new URL('https://imajinari.id');
+const canonical = new URL(Astro.url.pathname, site);
+const ogImage = new URL(image, site);
+---
 <!doctype html>
-<html lang="en">
+<html lang="id">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
@@ -16,8 +44,23 @@ import Footer from '../components/Footer.tsx';
 		<link rel="manifest" href="/site.webmanifest" />
 		<meta name="theme-color" content="#ffd012" />
 		<meta name="generator" content={Astro.generator} />
-		<title>imajinari — Imajinasi dalam Gerak</title>
-		<meta name="description" content="Galeri interaktif imajinari: seret, putar, dan jelajahi delapan karya abstrak dalam cincin 3D yang hidup." />
+
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical.href} />
+
+		<meta property="og:type" content={type} />
+		<meta property="og:site_name" content="imajinari" />
+		<meta property="og:locale" content="id_ID" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical.href} />
+		<meta property="og:image" content={ogImage.href} />
+
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImage.href} />
 	</head>
 	<body class="bg-[#0b0b12] text-neutral-100 antialiased">
 		<Navigation9 client:load />
@@ -26,11 +69,20 @@ import Footer from '../components/Footer.tsx';
 	</body>
 </html>
 
+<script>
+	// Smooth scroll global. Dijalankan sekali per halaman; modulnya menyimpan
+	// satu instance Lenis yang juga dipakai komponen lain (menu mobile).
+	import { initSmoothScroll } from '../lib/smooth-scroll';
+
+	initSmoothScroll();
+</script>
+
 <style>
+	/* Tanpa height: 100% — biarkan dokumen tumbuh setinggi konten supaya
+	   smooth scroll Lenis bisa mengukur jarak gulir dengan benar. */
 	html,
 	body {
 		margin: 0;
 		width: 100%;
-		height: 100%;
 	}
 </style>

@@ -1,0 +1,118 @@
+---
+import type { ComponentType, SVGProps } from "react";
+import {
+	SiFacebook,
+	SiInstagram,
+	SiThreads,
+	SiTiktok,
+	SiX,
+	SiYoutube,
+} from "react-icons/si";
+import type { Film, FilmSocial, SocialPlatform } from "./films";
+
+/**
+ * Section "Tentang film": sinopsis panjang + ikon sosial media film.
+ * Statis (tanpa JS) supaya isinya terbaca crawler.
+ *
+ * Daftar kredit (sutradara, penulis, pemain, genre, dst.) dan catatan
+ * penonton/penghargaan TIDAK di sini — kredit ada di section "Kredit
+ * Berjalan", ringkasan angka ada di halaman /tentang.
+ *
+ * Ikon brand memakai react-icons (Simple Icons) — lucide tidak punya ikon
+ * brand. Tidak ada border/background; hanya glyph yang menyala saat hover.
+ */
+interface Props {
+	film: Film;
+	socials: FilmSocial[];
+}
+
+const { film, socials } = Astro.props;
+
+const SOCIAL_LABEL: Record<SocialPlatform, string> = {
+	instagram: "Instagram",
+	tiktok: "TikTok",
+	youtube: "YouTube",
+	x: "X",
+	facebook: "Facebook",
+	threads: "Threads",
+};
+
+const SOCIAL_ICON: Record<
+	SocialPlatform,
+	ComponentType<SVGProps<SVGSVGElement>>
+> = {
+	instagram: SiInstagram,
+	tiktok: SiTiktok,
+	youtube: SiYoutube,
+	x: SiX,
+	facebook: SiFacebook,
+	threads: SiThreads,
+};
+
+/**
+ * Tinggi render per platform, dihitung dari tinggi glyph aslinya.
+ *
+ * Simple Icons menaruh semua brand di kotak 24×24, tapi tinggi gambar di
+ * dalamnya beda-beda: Instagram/TikTok/X/Facebook/Threads mengisi hampir
+ * penuh (~24/24), sedangkan YouTube cuma ~16,9/24 karena logonya berbentuk
+ * pil melebar. Kalau kotaknya disamakan, ikon YouTube terlihat lebih pendek.
+ *
+ * Jadi kotak YouTube dibesarkan 24 / 16,9 ≈ 1,42× supaya tinggi glyph-nya
+ * sama dengan yang lain: 20px (28px utk YouTube) di mobile, 24px (34px utk
+ * YouTube) di layar besar. Lebar tetap `w-auto` supaya proporsi brand utuh.
+ */
+const SOCIAL_HEIGHT: Record<SocialPlatform, string> = {
+	instagram: "h-5 w-auto sm:h-6",
+	tiktok: "h-5 w-auto sm:h-6",
+	youtube: "h-7 w-auto sm:h-[34px]",
+	x: "h-5 w-auto sm:h-6",
+	facebook: "h-5 w-auto sm:h-6",
+	threads: "h-5 w-auto sm:h-6",
+};
+---
+
+<section class="w-full border-t border-white/5 bg-[#0b0b12] px-4 py-16 text-neutral-100 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+	<div class="site-container">
+		<!-- Sinopsis + ikon sosial media, satu kolom, tanpa pembatas antar keduanya. -->
+		<div class="max-w-2xl">
+			<p class="flex items-center gap-3 text-xs font-medium tracking-[0.08em] text-neutral-400 uppercase">
+				<span class="h-px w-8 bg-(--color-accent)"></span>
+				Tentang film
+			</p>
+
+			<h2 class="mt-5 text-3xl leading-[1.05] font-medium tracking-tight text-balance sm:text-4xl lg:text-5xl">
+				Sinopsis film.
+			</h2>
+
+			<div class="mt-6 flex flex-col gap-5 text-base leading-relaxed text-pretty text-neutral-300 sm:text-lg">
+				{(film.synopsisLong ?? [film.synopsis]).map((paragraph) => (
+					<p>{paragraph}</p>
+				))}
+			</div>
+
+			{socials.length > 0 && (
+				<ul class="mt-8 flex flex-wrap items-center gap-5">
+					{socials.map((social) => {
+						const Icon = SOCIAL_ICON[social.platform];
+						return (
+							<li>
+								<a
+									href={social.url}
+									target="_blank"
+									rel="noopener noreferrer"
+									aria-label={`${social.handle ?? SOCIAL_LABEL[social.platform]} — tautan ${SOCIAL_LABEL[social.platform]} film ${film.title}`}
+									class="inline-block text-neutral-500 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-100"
+								>
+									<Icon
+										aria-hidden="true"
+										className={SOCIAL_HEIGHT[social.platform]}
+									/>
+								</a>
+							</li>
+						);
+					})}
+				</ul>
+			)}
+		</div>
+	</div>
+</section>

@@ -48,6 +48,13 @@ export function FilmGrid({ archive = false }: { archive?: boolean }) {
   // Mode arsip (/film): tampilkan seluruh filmografi tanpa batas 15.
   const ALL = archive ? FILMS : FILMS.slice(0, MAX_ITEMS);
 
+  // Teks ringkasan selalu bicara soal seluruh filmografi (bukan hanya yang
+  // sedang tampil).
+  const totalFilms = FILMS.length;
+  const years = FILMS.map((film) => Number(film.year));
+  const newestYear = Math.max(...years);
+  const oldestYear = Math.min(...years);
+
   const capacity = cols * MAX_ROWS;
   const truncated = !archive && ALL.length > capacity;
   const visible = archive || expanded ? ALL : ALL.slice(0, capacity);
@@ -87,9 +94,8 @@ export function FilmGrid({ archive = false }: { archive?: boolean }) {
               Semua film yang telah kami produksi.
             </h2>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-pretty text-neutral-400 sm:text-lg">
-              Dari {ALL[0].title} ({ALL[0].year}) hingga{" "}
-              {ALL[ALL.length - 1].title} ({ALL[ALL.length - 1].year}) —{" "}
-              {ALL.length} judul.
+              {totalFilms} film Imajinari, {oldestYear}–{newestYear}. Terbaru
+              lebih dulu.
             </p>
           </div>
           {/* Di beranda: expand in-place kalau kepotong, link ke /film
@@ -127,9 +133,8 @@ export function FilmGrid({ archive = false }: { archive?: boolean }) {
         >
           {visible.map((film) => (
             <motion.a
-              // TODO: arahkan ke halaman detail /film/[slug] (lihat docs/SEO.md)
-              key={film.title}
-              href="#"
+              key={film.slug}
+              href={`/film/${film.slug}`}
               variants={reveal(24)}
               className="group cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-neutral-100"
             >

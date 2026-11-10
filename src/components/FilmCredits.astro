@@ -1,0 +1,36 @@
+---
+import type { Film } from "./films";
+import { filmBackdrop } from "./films";
+import FilmCreditsRoll from "./FilmCreditsRoll.tsx";
+import ParallaxBackdrop from "./ParallaxBackdrop.tsx";
+
+/**
+ * Section kredit berjalan.
+ *
+ * Backdrop + credit roll berada di SATU panel yang sama: lebar dijepit
+ * `max-w-3xl`, rasio dikunci `aspect-video` (tidak bisa memanjang), dan
+ * `overflow-hidden` memotong gambar maupun teks tepat di batas panel.
+ * Section di luarnya cuma memberi jarak dan warna latar situs.
+ */
+interface Props {
+	film: Film;
+}
+
+const { film } = Astro.props;
+const backdrop = filmBackdrop(film);
+---
+
+<section
+	id="kredit"
+	class="w-full border-t border-white/5 bg-[#0b0b12] px-4 py-16 text-neutral-100 sm:px-6 sm:py-20 lg:px-8 lg:py-24"
+>
+	<div class="site-container">
+		<div class="relative mx-auto aspect-[2/1] min-h-[360px] w-full overflow-hidden rounded-2xl border border-white/10 bg-neutral-900">
+			<ParallaxBackdrop client:visible src={backdrop} />
+
+			<div class="absolute inset-0">
+				<FilmCreditsRoll client:visible film={film} />
+			</div>
+		</div>
+	</div>
+</section>

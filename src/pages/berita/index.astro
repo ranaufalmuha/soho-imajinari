@@ -1,0 +1,49 @@
+---
+import BeritaSection from '../../components/BeritaSection.tsx';
+import Layout from '../../layouts/Layout.astro';
+import { BERITA } from '../../components/berita';
+
+const site = Astro.site ?? new URL('https://imajinari.id');
+
+const pageTitle = 'Berita Imajinari — Rekor, Penghargaan, dan Catatan Produksi';
+const pageDescription = `${BERITA.length} catatan terbaru dari Imajinari: rekor penonton, penghargaan festival, dan kisah di balik produksi film-film kami.`;
+
+/* ItemList artikel: memperjelas ke crawler bahwa ini halaman indeks berita,
+   bukan satu artikel panjang. */
+const listLd = {
+	'@context': 'https://schema.org',
+	'@type': 'ItemList',
+	name: 'Berita Imajinari',
+	description: pageDescription,
+	numberOfItems: BERITA.length,
+	itemListOrder: 'https://schema.org/ItemListOrderDescending',
+	itemListElement: BERITA.map((article, index) => ({
+		'@type': 'ListItem',
+		position: index + 1,
+		item: {
+			'@type': 'NewsArticle',
+			headline: article.title,
+			url: new URL(`/berita/${article.slug}`, site).href,
+			datePublished: article.date,
+			articleSection: article.category,
+			publisher: { '@type': 'Organization', name: 'Imajinari' },
+		},
+	})),
+};
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+	<main class="pt-24 sm:pt-28">
+		<BeritaSection
+			client:visible
+			headingLevel="h1"
+			items={BERITA}
+			eyebrow="Berita"
+			title="Berita Imajinari."
+			description="Rekor penonton, penghargaan festival, dan catatan di balik produksi film-film kami."
+			showAllLink={false}
+		/>
+	</main>
+
+	<script type="application/ld+json" set:html={JSON.stringify(listLd)} />
+</Layout>

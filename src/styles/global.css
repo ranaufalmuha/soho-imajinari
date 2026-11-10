@@ -1,2 +1,29 @@
 @import "tailwindcss";
 @import "./tokens.css";
+
+/**
+ * Gaya wajib Lenis (smooth scroll).
+ * Lenis menambahkan class `lenis` + `lenis-smooth` ke <html> saat aktif.
+ * Tanpa aturan ini, `scroll-behavior: smooth` bawaan bisa bentrok dan
+ * overflow pada <body> dapat mematikan perhitungan tinggi dokumen.
+ */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}

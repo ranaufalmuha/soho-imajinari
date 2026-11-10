@@ -1,13 +1,50 @@
 ---
 import FilmGrid from '../components/FilmGrid.tsx';
-import CtaSection from '../components/CtaSection.tsx';
 import Layout from '../layouts/Layout.astro';
+import { FILMS } from '../components/films';
+
+const site = Astro.site ?? new URL('https://imajinari.id');
+
+// FILMS sudah terurut terbaru → terlama.
+const newest = FILMS[0];
+const oldest = FILMS[FILMS.length - 1];
+const years = FILMS.map((film) => Number(film.year));
+const oldestYear = Math.min(...years);
+const newestYear = Math.max(...years);
+
+const pageTitle = `Filmografi Imajinari — ${FILMS.length} film Indonesia (${oldestYear}–${newestYear})`;
+const pageDescription = `${FILMS.length} film Imajinari, ${oldestYear}–${newestYear}. Terbaru lebih dulu: dari ${newest.title} sampai ${oldest.title}.`;
+
+/* ItemList membantu mesin pencari dan mesin jawaban (AI) memahami bahwa
+   halaman ini adalah daftar film berurutan, bukan artikel lepas. */
+const itemListLd = {
+	'@context': 'https://schema.org',
+	'@type': 'ItemList',
+	name: `Filmografi Imajinari (${oldestYear}–${newestYear})`,
+	description: pageDescription,
+	numberOfItems: FILMS.length,
+	itemListOrder: 'https://schema.org/ItemListOrderDescending',
+	itemListElement: FILMS.map((film, index) => ({
+		'@type': 'ListItem',
+		position: index + 1,
+		item: {
+			'@type': 'Movie',
+			name: film.title,
+			url: new URL(`/film/${film.slug}`, site).href,
+			datePublished: film.releaseDate,
+			genre: film.genre,
+			director: { '@type': 'Person', name: film.director },
+			productionCompany: { '@type': 'Organization', name: 'Imajinari' },
+		},
+	})),
+};
 ---
 
-<Layout>
+<Layout title={pageTitle} description={pageDescription}>
 	{/* pt untuk ruang nav fixed di atas; archive=true = seluruh filmografi, tanpa batas 15 */}
-	<main className="pt-24 sm:pt-28">
+	<main class="pt-24 sm:pt-28">
 		<FilmGrid client:visible archive={true} />
-		<CtaSection client:visible />
 	</main>
+
+	<script type="application/ld+json" set:html={JSON.stringify(itemListLd)} />
 </Layout>

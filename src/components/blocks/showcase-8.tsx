@@ -3,13 +3,45 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
-import { FILMS } from "../films";
+import { FILMS, type Film } from "../films";
 
-// Menampilkan filmografi penuh (11 film); kartu mengambil poster dari modul
-// data bersama dengan hero. Urutan kronologis sesuai sumber.
+// Menampilkan filmografi penuh; kartu mengambil poster dari modul data
+// bersama dengan hero. Urutan kronologis sesuai sumber.
+//
+// Dipakai dua tempat:
+// - Beranda: tanpa props → copy asli + seluruh filmografi.
+// - Halaman detail film: props dipakai untuk "Film serupa" (judul, deskripsi,
+//   daftar film, dan film aktif yang dikecualikan).
 
-export function Showcase8() {
+interface Showcase8Props {
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+  films?: Film[];
+  excludeSlug?: string;
+  limit?: number;
+  ariaLabel?: string;
+}
+
+const DEFAULT_TITLE = "Satu musim karya yang tuntas.";
+const DEFAULT_DESCRIPTION =
+  "Identitas, platform, dan situs peluncuran — dikerjakan bersama tim yang kini menjalankannya sendiri.";
+
+export function Showcase8({
+  eyebrow,
+  title = DEFAULT_TITLE,
+  description = DEFAULT_DESCRIPTION,
+  films = FILMS,
+  excludeSlug,
+  limit,
+  ariaLabel = "Karya terpilih",
+}: Showcase8Props = {}) {
   const reduceMotion = useReducedMotion();
+
+  const items = films
+    .filter((film) => film.slug !== excludeSlug)
+    .slice(0, limit ?? films.length);
+
   const trackRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef(0);
   const [canPrev, setCanPrev] = useState(false);
@@ -107,12 +139,19 @@ export function Showcase8() {
           className="mb-10 flex flex-col gap-8 sm:mb-12 lg:flex-row lg:items-end lg:justify-between"
         >
           <motion.div variants={reveal(20)} className="max-w-2xl">
-            <h2 className="text-3xl leading-[1.05] font-medium tracking-tight text-balance sm:text-4xl lg:text-5xl">
-              Satu musim karya yang tuntas.
+            {eyebrow && (
+              <p className="flex items-center gap-3 text-xs font-medium tracking-[0.08em] text-neutral-400 uppercase">
+                <span className="h-px w-8 bg-(--color-accent)" />
+                {eyebrow}
+              </p>
+            )}
+            <h2
+              className={`leading-[1.05] font-medium tracking-tight text-balance text-3xl sm:text-4xl lg:text-5xl ${eyebrow ? "mt-6" : ""}`}
+            >
+              {title}
             </h2>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-pretty text-neutral-400 sm:text-lg">
-              Identitas, platform, dan situs peluncuran — dikerjakan bersama tim
-              yang kini menjalankannya sendiri.
+              {description}
             </p>
           </motion.div>
 
@@ -143,7 +182,7 @@ export function Showcase8() {
             ref={trackRef}
             onScroll={handleScroll}
             role="region"
-            aria-label="Karya terpilih"
+            aria-label={ariaLabel}
             tabIndex={0}
             variants={trackVariants}
             initial="hidden"
@@ -151,10 +190,10 @@ export function Showcase8() {
             viewport={{ once: true, margin: "-80px" }}
             className="flex snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain px-4 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-100 sm:gap-6 sm:px-6 lg:px-8 [&::-webkit-scrollbar]:hidden"
           >
-            {FILMS.map((film) => (
+            {items.map((film) => (
               <motion.a
-                key={film.title}
-                href="#"
+                key={film.slug}
+                href={`/film/${film.slug}`}
                 variants={reveal(24)}
                 whileHover="hover"
                 className="group w-[62vw] max-w-[320px] shrink-0 cursor-pointer snap-start scroll-ml-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-neutral-100 sm:w-[300px] sm:scroll-ml-6 lg:w-[340px] lg:scroll-ml-8"

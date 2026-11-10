@@ -10,10 +10,12 @@ import { TICKETS_URL } from "./tickets";
 // Gambar memakai `backdrop` (poster horizontal 16:9, cocok untuk kartu reel)
 // dan jatuh kembali ke `poster` vertikal kalau belum ada.
 const ITEMS = FILMS.filter((film) => film.nowShowing).map((film) => ({
+  slug: film.slug,
   src: film.backdrop || film.poster,
   alt: `Poster ${film.title} (${film.year}), sutradara ${film.director}`,
   title: film.title,
   subtitle: film.synopsis,
+  href: `/film/${film.slug}`,
 }));
 
 export default function ReelHero() {
@@ -93,9 +95,9 @@ export default function ReelHero() {
                   >
                     Get Tickets
                   </a>
-                  {/* TODO: arahkan ke halaman detail film */}
+                  {/* Tombol menuju halaman detail film yang sedang aktif. */}
                   <a
-                    href="#tentang-film"
+                    href={`/film/${current.slug}`}
                     tabIndex={isActive ? 0 : -1}
                     className="rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium backdrop-blur transition hover:bg-white/15"
                   >

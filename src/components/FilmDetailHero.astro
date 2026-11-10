@@ -1,0 +1,113 @@
+---
+import type { Film } from "./films";
+import { formatRuntime } from "./films";
+import { TICKETS_URL } from "./tickets";
+import HeroVideoBackground from "./HeroVideoBackground.tsx";
+
+/**
+ * Hero halaman detail film — teks dirender statis (tanpa JS) supaya judul
+ * dan meta terbaca crawler. Latar hanya trailer film (YouTube autoplay);
+ * tidak ada gambar cover horizontal lagi. Kalau JS mati / reduced-motion /
+ * Save-Data, hero jatuh ke warna dasar gelap tanpa video.
+ */
+interface Props {
+	film: Film;
+	/** YouTube video ID untuk latar autoplay. */
+	videoId: string;
+}
+
+const { film, videoId } = Astro.props;
+
+const meta = [
+	film.year,
+	film.genre,
+	film.runtime ? formatRuntime(film.runtime) : null,
+	`Sutradara ${film.director}`,
+].filter(Boolean) as string[];
+
+const trailerUrl = `https://www.youtube.com/watch?v=${videoId}`;
+---
+
+<section class="relative isolate flex min-h-[78svh] flex-col justify-end overflow-hidden bg-[#08080d] pt-28 sm:pt-32">
+	<!-- Latar: hanya trailer yang autoplay + scrim tipis untuk keterbacaan teks. -->
+	<div class="absolute inset-0 -z-10">
+		<HeroVideoBackground client:idle videoId={videoId} title={`Trailer ${film.title}`} />
+
+		<div class="absolute inset-0 bg-gradient-to-t from-[#08080d] via-[#08080d]/70 to-[#08080d]/25"></div>
+		<div class="absolute inset-0 bg-gradient-to-r from-[#08080d]/90 via-[#08080d]/30 to-transparent"></div>
+	</div>
+
+	<div class="px-4 pb-16 sm:px-6 lg:px-8 lg:pb-20">
+		<div class="site-container">
+			<div class="grid gap-8 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-end sm:gap-10 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-14">
+				<!-- Poster vertikal: penyeimbang visual di desktop; di mobile
+				     disembunyikan karena video/backdrop sudah membawa konteks. -->
+				<div class="hidden sm:block">
+					<div class="relative aspect-[2/3] w-full overflow-hidden border border-white/10 bg-neutral-900 shadow-2xl shadow-black/60">
+						<img
+							src={film.poster}
+							alt={`Poster film ${film.title} (${film.year}), sutradara ${film.director}`}
+							width={600}
+							height={900}
+							loading="eager"
+							draggable={false}
+							class="absolute inset-0 h-full w-full object-cover"
+						/>
+					</div>
+				</div>
+
+				<div class="max-w-2xl">
+					<p class="flex items-center gap-3 text-xs font-medium tracking-[0.08em] text-neutral-300 uppercase">
+						<span class="h-px w-8 bg-(--color-accent)"></span>
+						{film.nowShowing ? "Sedang tayang" : "Filmografi"} · {film.year}
+					</p>
+
+					<h1 class="mt-5 text-4xl leading-[1.02] font-medium tracking-tight text-balance sm:text-5xl lg:text-6xl xl:text-7xl">
+						{film.title}
+					</h1>
+
+					<ul class="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-neutral-200">
+						{meta.map((item, index) => (
+							<li class="flex items-center gap-3">
+								{index > 0 && <span aria-hidden="true" class="text-neutral-500">·</span>}
+								<span>{item}</span>
+							</li>
+						))}
+					</ul>
+
+					<div class="mt-8 flex flex-wrap items-center gap-3">
+						<a
+							href={trailerUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="inline-flex items-center gap-2 rounded-full bg-neutral-100 px-6 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-100"
+						>
+							<svg viewBox="0 0 24 24" aria-hidden="true" class="h-4 w-4 fill-current">
+								<path d="M8 5.14v13.72L19 12 8 5.14Z"></path>
+							</svg>
+							Tonton Trailer
+						</a>
+
+						{film.nowShowing ? (
+							<a
+								href={TICKETS_URL}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="inline-flex items-center gap-2 rounded-full border border-white/25 px-6 py-3 text-sm font-semibold text-neutral-100 transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-100"
+							>
+								Pesan Tiket
+							</a>
+						) : (
+							<a
+								href="/film"
+								class="inline-flex items-center gap-2 rounded-full border border-white/25 px-6 py-3 text-sm font-semibold text-neutral-100 transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-100"
+							>
+								Semua Film
+							</a>
+						)}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
